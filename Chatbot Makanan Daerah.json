@@ -1,0 +1,123 @@
+{
+  "name": "Chatbot Makanan Daerah",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo! Saya asisten Kuliner Nusantara.\nTanyakan apa saja tentang makanan daerah di Indonesia.",
+        "options": {
+          "inputPlaceholder": "Contoh: Apa makanan khas Palembang?",
+          "subtitle": "Tanya seputar kuliner khas daerah Nusantara",
+          "title": "Chatbot Makanan Daerah",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "ce9c25c8-0acc-4e0d-8944-9ce9e93b4cfe",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "55b89a85-25e5-4572-8f49-fa485bb82206"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah \"Asisten Kuliner Nusantara\", chatbot yang ahli tentang makanan daerah (makanan khas/tradisional) di Indonesia.\n\nTugasmu:\n- Menjawab pertanyaan tentang makanan khas dari berbagai daerah/provinsi di Indonesia.\n- Menjelaskan asal daerah, sejarah singkat, bahan utama, cara membuat/resep sederhana, cita rasa, dan cara penyajian.\n- Memberi rekomendasi makanan khas berdasarkan daerah, rasa (pedas, manis, gurih), atau acara tertentu.\n- Membandingkan makanan daerah yang mirip (misalnya rendang vs kalio, soto Betawi vs soto Lamongan).\n\nAturan menjawab:\n- Gunakan Bahasa Indonesia yang ramah, jelas, dan mudah dipahami.\n- Jawab ringkas dan terstruktur (gunakan poin bila perlu).\n- Jika tidak yakin dengan suatu fakta, katakan dengan jujur dan jangan mengarang.\n- Jika pertanyaan di luar topik makanan daerah Indonesia, tolak dengan sopan dan arahkan pengguna kembali ke topik kuliner Nusantara."
+        }
+      },
+      "id": "e59bce3e-7f08-4e6c-aa95-d310105cfbf0",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "id": "611657c9-09e2-473d-8347-0484b7ac4193",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        336
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "54aaaee4-b550-46cb-b2a7-59c7820fd439",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4dedb26c-aebb-40ed-9958-f04fd78fa2c0",
+  "meta": {
+    "instanceId": "e1cf556e5fffda951af4c228c4db0e3d997f350b749ff756e80cf2097cf0b7b2"
+  },
+  "nodeGroups": [],
+  "id": "8LeLzl8VzNe8nBbV",
+  "tags": []
+}
