@@ -1,0 +1,167 @@
+{
+  "name": "AI Agent Chatbot FAQ (Google Sheets)",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Selamat datang di Nasi Padang Sederhana! 🍛✨\n\nSiap mengisi perut lapar Anda dengan sajian khas Minang yang lezat dan otentik.\n\nSilakan ketik menu yang ingin dipesan atau ketik /menu untuk melihat daftar harga lengkap.",
+        "options": {
+          "inputPlaceholder": "Ketik pertanyaan Anda...",
+          "subtitle": "Siap melayani pesanan dan info menu 🍛.",
+          "title": "Uda Bot"
+        }
+      },
+      "id": "ae209a52-57e1-43d2-9035-17e3d3ae87b1",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "6e73eb4f-79cc-4426-a191-a411b7e5b8df"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "\"Kamu adalah asisten virtual ramah dan cekatan bernama 'Uda Bot' dari Warung Nasi Padang.\n\nTugas Utama:\n\nMenyapa pelanggan dengan sebutan 'Uda' atau 'Uni'.\n\nMembantu pelanggan melihat daftar menu dan harga dari Data Table/Google Sheets.\n\nMembantu pelanggan mencatat pesanan makanan/minuman.\n\nMengonfirmasi pesanan (menu, jumlah, alamat pengiriman, dan total harga) sebelum diproses.\n\nAturan:\n\nGunakan bahasa Indonesia yang santun, ramah, dan sedikit sentuhan khas Minang (seperti menyapa Uda/Uni, menggunakan kata 'Samba', dll.).\n\nJika ada menu yang tidak tersedia di database, informasikan dengan sopan.\n\nBerikan respons yang singkat, jelas, dan mudah dibaca di layar HP.\"\nTool yang tersedia:\n- \"Get row(s) in sheet in Google Sheets\": membaca baris-baris data (daftar pertanyaan dan jawaban/informasi) dari Google Sheets.\n\nAturan:\n1. Setiap kali pengguna bertanya, SELALU gunakan tool \"Get row(s) in sheet in Google Sheets\" terlebih dahulu untuk mengambil data, lalu cari baris yang paling relevan dengan pertanyaan.\n2. Jawab hanya berdasarkan data dari sheet. Jangan mengarang informasi.\n3. Jika jawaban tidak ditemukan di sheet, katakan dengan sopan bahwa informasinya belum tersedia dan sarankan pengguna menghubungi admin.\n4. Jika pengguna hanya menyapa atau berbasa-basi, balas dengan ramah tanpa perlu memanggil tool.\n5. Gunakan riwayat percakapan untuk memahami pertanyaan lanjutan.\n6. Jawab dengan singkat, jelas, dan sopan."
+        }
+      },
+      "id": "ddab584a-2cad-4281-97e8-436bcc3513c8",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "485a189a-6f5f-4e50-a6bc-91bfe52be07e",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        336
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "fd2ba85a-e207-4274-9a41-620687edfc52",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        352,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k",
+          "mode": "list",
+          "cachedResultName": "Daftar Menu Warung padang",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "8fb21ec1-dae5-4909-ad81-2be22d4384dd",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        336
+      ],
+      "notesInFlow": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "egSaGWuVX5wUGYe6",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "aaf45636-1611-43da-822b-d7a4d9e538cd",
+  "meta": {
+    "instanceId": "e1cf556e5fffda951af4c228c4db0e3d997f350b749ff756e80cf2097cf0b7b2"
+  },
+  "nodeGroups": [],
+  "id": "vESp8ZYy2irU4ggL",
+  "tags": []
+}
