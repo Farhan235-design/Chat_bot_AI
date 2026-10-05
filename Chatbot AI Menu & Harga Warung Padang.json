@@ -1,0 +1,166 @@
+{
+  "name": "Chatbot AI Menu & Harga Warung Padang",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo! Selamat datang di Warung Padang.\nSilakan tanya menu dan harga makanan kami.",
+        "options": {
+          "inputPlaceholder": "Contoh: Berapa harga rendang?",
+          "subtitle": "Tanyakan menu dan harga di sini",
+          "title": "Chatbot Warung Padang"
+        }
+      },
+      "id": "de477c96-8cd8-4507-9551-15ba71be5bda",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "173362a9-2866-43ac-967b-c6b7bbe76d20"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah asisten virtual (customer service) untuk Warung Padang.\nTugasmu adalah menjawab pertanyaan pelanggan tentang menu makanan/minuman yang tersedia beserta harganya.\n\nAturan:\n1. Setiap kali pelanggan bertanya tentang menu, produk, ketersediaan, atau harga, WAJIB gunakan tool \"Get row(s) in sheet in Google Sheets\" untuk membaca daftar menu dan harga terbaru dari Google Sheets.\n2. Jawab hanya berdasarkan data dari tool tersebut. Jangan mengarang menu atau harga yang tidak ada di sheet.\n3. Jika menu yang ditanyakan tidak ada di data, sampaikan dengan sopan bahwa menu tersebut tidak tersedia dan tawarkan menu lain yang mirip.\n4. Tulis harga dalam format Rupiah, contoh: Rp15.000.\n5. Jika pelanggan ingin memesan beberapa menu, bantu hitung total harganya.\n6. Jawab dengan bahasa Indonesia yang ramah, singkat, dan jelas.\n7. Jika pertanyaan di luar topik menu dan harga Warung Padang, arahkan kembali pelanggan dengan sopan ke topik menu dan harga."
+        }
+      },
+      "id": "ace7f3a0-240d-4c46-80c7-e57e00b26e90",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "9549d18b-ba09-451d-97cf-b31bd7f86c44",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        336
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "30c564a3-8fad-4229-8aab-6407ab50d87f",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        352,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k",
+          "mode": "list",
+          "cachedResultName": "Daftar Menu Warung padang",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y0lSW4vf9gf3_7kxkmeFdK540zqlbVEosf7mdqULP5k/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "438b0820-bf50-4672-8801-cf9137cf3085",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qA7TUbsHld94p8nV",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8470d8d1-92ae-4ddb-9e7f-089a2b2104f2",
+  "meta": {
+    "instanceId": "e1cf556e5fffda951af4c228c4db0e3d997f350b749ff756e80cf2097cf0b7b2"
+  },
+  "nodeGroups": [],
+  "id": "iM0C4XqW0r2TiryO",
+  "tags": []
+}
