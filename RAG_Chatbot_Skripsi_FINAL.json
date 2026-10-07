@@ -1,0 +1,344 @@
+{
+  "name": "RAG Chatbot Penulisan Skripsi (FINAL)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "0224e657-4050-47b8-9f27-dfa9a6e70fb7",
+      "name": "Mulai Upload Dokumen",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1aYeXQHpubMl2t1OH653z9Gc5jWJ0t0bN",
+          "mode": "list",
+          "cachedResultName": "Panduan Penulisan Ilmiah Tugas Akhir Skripsi.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1aYeXQHpubMl2t1OH653z9Gc5jWJ0t0bN/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "id": "5ded0abe-2e9a-4a79-a987-c8cb649e19c1",
+      "name": "Download PDF dari Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        112
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wD2JrZcsxChBJ0Lp",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents",
+          "cachedResultUrl": ""
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "3d3834ab-0c93-4b19-9ae4-5cee741e9816",
+      "name": "Simpan ke Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5WuQURGPDvITT9gH",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "loader": "pdfLoader",
+        "options": {
+          "splitPages": true,
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "topik",
+                "value": "Penulisan Ilmiah Tugas Akhir Skripsi"
+              }
+            ]
+          }
+        }
+      },
+      "id": "24ec3caa-68bc-4c3e-bd1a-1ee2d03e6641",
+      "name": "Default Data Loader (PDF)",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo! Saya Asisten Skripsi.\nTanyakan apa saja tentang penulisan ilmiah tugas akhir skripsi (struktur bab, metode penelitian, sitasi, format penulisan, dll).",
+        "options": {}
+      },
+      "id": "bc47c734-ba58-4493-b559-c1cd91b42161",
+      "name": "Chat Skripsi",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -448,
+        640
+      ],
+      "webhookId": "3cb5cfce-ad20-420f-a1a4-94d3515024b8"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah \"Asisten Skripsi\", chatbot AI berbasis web yang bertugas menjawab pertanyaan mahasiswa tentang penulisan ilmiah tugas akhir skripsi.\n\nTugas:\n- Menjelaskan struktur dan isi setiap bab skripsi (pendahuluan, tinjauan pustaka, metodologi, hasil dan pembahasan, penutup).\n- Menjelaskan kaidah penulisan ilmiah: format dokumen, tata bahasa, penulisan kutipan/sitasi, daftar pustaka, tabel, dan gambar.\n- Membantu memahami metode penelitian dan alur penyusunan skripsi sesuai panduan.\n\nTool:\n- Kamu memiliki tool \"panduan_skripsi\" yang terhubung ke Supabase Vector Store berisi dokumen panduan penulisan skripsi.\n- SELALU panggil tool \"panduan_skripsi\" terlebih dahulu sebelum menjawab pertanyaan yang berkaitan dengan skripsi.\n- Jawab HANYA berdasarkan informasi yang ditemukan dari tool tersebut. Jika informasi tidak ditemukan di dokumen, katakan dengan jujur bahwa informasi tersebut tidak ada dalam panduan, lalu berikan saran umum yang ditandai jelas sebagai saran umum.\n- Jangan mengarang aturan, angka, atau format yang tidak ada di dokumen.\n\nGaya jawaban:\n- Gunakan Bahasa Indonesia yang baku, sopan, dan mudah dipahami.\n- Jawab secara terstruktur (poin-poin atau langkah-langkah) bila sesuai.\n- Jika pertanyaan di luar topik penulisan skripsi, tolak dengan sopan dan arahkan kembali ke topik skripsi."
+        }
+      },
+      "id": "8a3cc91a-f595-4f95-9a60-bad3394551e8",
+      "name": "AI Agent Asisten Skripsi",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "1ee7f2c3-890b-47b1-af47-9a494c815822",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Mencari informasi dari dokumen panduan penulisan ilmiah tugas akhir skripsi (struktur bab, metode penelitian, kaidah penulisan, sitasi, daftar pustaka, format dokumen). Gunakan untuk setiap pertanyaan tentang skripsi.",
+        "tableName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "documents"
+        },
+        "topK": 5,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "deb5efe8-af57-445b-977a-3fc3fceafe63",
+      "name": "panduan_skripsi",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        864
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "5WuQURGPDvITT9gH",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        224
+      ],
+      "id": "d90e330c-39a0-40d7-a87e-476f02973335",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3VETwzLeA0RmaKgb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        1072
+      ],
+      "id": "9015f929-bddb-4f60-8664-af70adbf58ee",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3VETwzLeA0RmaKgb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        848
+      ],
+      "id": "fc30dc15-bf82-4a9f-8cb2-f7a1fc6f2628",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3VETwzLeA0RmaKgb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mulai Upload Dokumen": {
+      "main": [
+        [
+          {
+            "node": "Download PDF dari Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF dari Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Simpan ke Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader (PDF)": {
+      "ai_document": [
+        [
+          {
+            "node": "Simpan ke Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Skripsi": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Asisten Skripsi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent Asisten Skripsi",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "panduan_skripsi": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Asisten Skripsi",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simpan ke Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "panduan_skripsi",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Asisten Skripsi",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "727ba1cc-8ad2-488a-980d-b2d162d91a10",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
