@@ -1,0 +1,104 @@
+{
+  "name": "Auto-Responder Email Pendaftaran",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Pendaftaran SIBM NF Academy Batch 6",
+        "formDescription": "Silakan isi data berikut untuk mendaftar. Email konfirmasi akan dikirim otomatis.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama kamu",
+              "placeholder": "Farhan aditya",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "nama@email.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Kelas",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI for Business"
+                  },
+                  {
+                    "option": "Digital Marketing"
+                  },
+                  {
+                    "option": "Data Analytics"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb8ce5ab-f07d-48f1-abe3-f8cf14e6dbf8",
+      "name": "Form Pendaftaran",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "fa25497a-2de7-49fa-815a-b697333374c6"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Informasi Pendaftaran SIBM NF Academy Batch 6 - {{ $json.Nama }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<style>\n  body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Arial, sans-serif; }\n  .wrapper { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n  .header { background-color: #2f5fb3; color: #ffffff; padding: 24px; text-align: center; }\n  .content { padding: 24px; color: #333333; line-height: 1.6; }\n  .box { background-color: #eef3fb; border-left: 4px solid #f08a24; padding: 12px 16px; margin: 16px 0; }\n  .footer { background-color: #f08a24; color: #ffffff; padding: 12px; text-align: center; font-size: 12px; }\n</style>\n</head>\n<body>\n  <div class='wrapper'>\n    <div class='header'>\n      <h2 style='margin:0;'>NF Academy - Konfirmasi Pendaftaran</h2>\n    </div>\n    <div class='content'>\n      <p>Halo {{ $json.Nama }},</p>\n      <p>Terima kasih telah mendaftar di <b>SIBM NF Academy Batch 6</b>. Pendaftaran Anda telah kami terima dengan data berikut:</p>\n      <div class='box'>\n        <p style='margin:0;'><b>Nama:</b> {{ $json.Nama }}</p>\n        <p style='margin:0;'><b>Email:</b> {{ $json.Email }}</p>\n        <p style='margin:0;'><b>Kelas:</b> {{ $json.Kelas }}</p>\n      </div>\n      <p>Informasi lebih lanjut mengenai jadwal dan persiapan kelas <b>{{ $json.Kelas }}</b> akan kami kirimkan melalui email ini.</p>\n      <p>Salam hangat,<br>Tim NF Academy</p>\n    </div>\n    <div class='footer'>Email ini dikirim otomatis. Mohon tidak membalas email ini.</div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "b8d65bd0-356a-4f4d-bf7f-309448769e55",
+      "name": "Kirim Email Konfirmasi",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        0
+      ],
+      "webhookId": "2b8e4d17-6a3c-4f90-8d25-9c7e1a4b0f02",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "S1314ZPgREQJyerd",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Form Pendaftaran": {
+      "main": [
+        [
+          {
+            "node": "Kirim Email Konfirmasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7be56df7-4032-4e4f-bc46-f2f18b86d0dc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "id": "WWGnbwi4Mx5KB5Ee",
+  "tags": []
+}
