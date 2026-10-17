@@ -1,0 +1,1148 @@
+{
+  "name": "Pembuatan Konten Rutin",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "c85c5175-0187-4374-8521-39f7be1fe4da",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        1472
+      ],
+      "webhookId": "telegram-konten-rutin",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c-234538",
+                    "leftValue": "={{ $json.message.text || '' }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "rightValue": "/start"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ide (/start)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c-964230",
+                    "leftValue": "={{ ($json.message.caption || '').toLowerCase().trim() }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "video"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Video (caption)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c-817137",
+                    "leftValue": "={{ $json.message.text || '' }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty"
+                    }
+                  },
+                  {
+                    "id": "c-528746",
+                    "leftValue": "={{ $json.message.text || '' }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notStartsWith"
+                    },
+                    "rightValue": "/start"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Gambar (teks biasa)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19d642c2-0552-48a6-bef3-058cd2917e27",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "tanggal",
+              "type": "string",
+              "value": "={{ $now.setLocale('id').toFormat('cccc, dd LLLL yyyy') }}"
+            },
+            {
+              "id": "a2",
+              "name": "tema",
+              "type": "string",
+              "value": "={{ $json.message.text.replace('/start', '').trim() || 'konten media sosial umum untuk bisnis' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6494b776-ae1e-43eb-80ea-47593f90291e",
+      "name": "Siapkan Input Ide",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah content strategist profesional.\nSusun rencana konten harian untuk tanggal {{ $json.tanggal }} dengan tema: {{ $json.tema }}.\nBuat 5 slot waktu posting yang tersebar sepanjang hari (pagi sampai malam). Setiap slot berisi: time_slot (format HH:MM), title (judul ide konten yang spesifik dan menarik), platform (misal Instagram, TikTok, LinkedIn), dan focus (tujuan/fokus konten dalam 1 kalimat).\nGunakan Bahasa Indonesia. Keluarkan HANYA data sesuai skema JSON, tanpa teks pembuka atau penutup.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "659418dc-f8f1-4155-9ee4-0ad4d631bdf2",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        992,
+        1168
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "id": "c04f4e78-c784-472b-9226-13efc71b64bc",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        992,
+        1360
+      ],
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hHhfjO6COnSiz3MQ",
+          "name": "Google Gemini(PaLM) Api farhan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"rencana_konten\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"time_slot\": {\n            \"type\": \"string\",\n            \"description\": \"Jam posting, format HH:MM\"\n          },\n          \"title\": {\n            \"type\": \"string\",\n            \"description\": \"Judul ide konten\"\n          },\n          \"platform\": {\n            \"type\": \"string\",\n            \"description\": \"Platform media sosial\"\n          },\n          \"focus\": {\n            \"type\": \"string\",\n            \"description\": \"Fokus/tujuan konten\"\n          }\n        },\n        \"required\": [\n          \"time_slot\",\n          \"title\",\n          \"platform\",\n          \"focus\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"rencana_konten\"\n  ]\n}"
+      },
+      "id": "ee3cb55f-c7fc-4d95-a474-98cdc5241e41",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        1344
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.rencana_konten",
+        "options": {}
+      },
+      "id": "9128056d-c0ae-41d9-8629-bed37f568d4e",
+      "name": "Pisah Rencana Konten",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "pesan",
+              "type": "string",
+              "value": "=⏰ {{ $json.time_slot }}\n📝 {{ $json.title }}\n📱 {{ $json.platform }}\n🎯 {{ $json.focus }}\n\nBalas dengan judul di atas untuk membuat gambarnya."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1dfb8a55-d0be-4130-8060-1168e1990751",
+      "name": "Format Pesan Ide",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.pesan }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fbd17df2-bd5c-40fb-91fa-6bb0b8e8b433",
+      "name": "Kirim Ide ke Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        1168
+      ],
+      "webhookId": "tg-send-ide",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/gpt4o-image/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: $('Telegram Trigger').first().json.message.text, size: '1:1', nVariants: 1 }) }}",
+        "options": {}
+      },
+      "id": "0e0c2cd3-7486-4d41-b292-3bb645fb640c",
+      "name": "KIE - Buat Gambar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        1472
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FP9UPQrZsHBO6zDY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "id": "b45b264c-c30a-4e58-b08c-9b953d60f432",
+      "name": "Tunggu Gambar",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        1472
+      ],
+      "webhookId": "wait-173936"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/gpt4o-image/record-info",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $('KIE - Buat Gambar').first().json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd235bf4-db77-4d22-a8da-a3f64cf9de68",
+      "name": "KIE - Cek Status Gambar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        1472
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FP9UPQrZsHBO6zDY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-f0a40016",
+              "leftValue": "={{ String($json.data.status || '') }}",
+              "rightValue": "SUCCESS",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c-482c3e88",
+              "leftValue": "={{ Number($json.data.successFlag) }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "4a1e0006-f299-4049-9aa9-0cbf19a4dbfc",
+      "name": "Gambar Selesai?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "6634877058",
+        "file": "={{ (() => { let r = $json.data.response.resultUrls; if (typeof r === 'string') r = JSON.parse(r); return r[0]; })() }}",
+        "additionalFields": {
+          "caption": "=🖼️ {{ $('Telegram Trigger').first().json.message.text }}"
+        }
+      },
+      "id": "d26810b8-835e-421f-adfc-76c2acf324c3",
+      "name": "Kirim Gambar ke Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1664,
+        1456
+      ],
+      "webhookId": "tg-send-photo",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6634877058",
+        "text": "🎬 Gambar diterima. Video sedang dibuat, mohon tunggu beberapa menit...",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "efd7795a-3a9c-4de4-909d-3603d929a9f4",
+      "name": "Info Proses Video",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        1824
+      ],
+      "webhookId": "tg-info-video",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').first().json.message.photo.at(-1).file_id }}",
+        "additionalFields": {}
+      },
+      "id": "dd5f814a-c474-4014-817f-ba68843edd6a",
+      "name": "Get a File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        1824
+      ],
+      "webhookId": "tg-get-file",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "id": "f92f7731-2ba3-46cf-a51e-b080eff1d894",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Konversi Base64 string -> Buffer biner, lalu jadikan binary item n8n\nconst base64 = $input.first().json.data;\nif (!base64) throw new Error('Data Base64 tidak ditemukan. Pastikan node Extract from File berjalan.');\n\nconst buffer = Buffer.from(base64, 'base64');\nconst binaryData = await this.helpers.prepareBinaryData(buffer, 'foto_telegram.jpg', 'image/jpeg');\n\nreturn [{\n  json: {\n    fileName: 'foto_telegram.jpg',\n    sizeKB: Math.round(buffer.length / 1024),\n    base64DataUrl: 'data:image/jpeg;base64,' + base64\n  },\n  binary: { data: binaryData }\n}];"
+      },
+      "id": "1c7f1a41-2853-4e46-bce5-2ee4221e0ccf",
+      "name": "Code - Base64 ke Buffer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "models/gemini-3.5-flash"
+        },
+        "text": "Lihat gambar ini lalu tulis SATU prompt video sinematik dalam Bahasa Inggris (maks 80 kata): gerakan kamera, gerakan subjek, pencahayaan, dan suasana. Keluarkan hanya prompt-nya.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "2ebcb70f-099b-4c35-81e4-3e99fa507154",
+      "name": "Gemini - Analisis Gambar",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        1824
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hHhfjO6COnSiz3MQ",
+          "name": "Google Gemini(PaLM) Api farhan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://kieai.redpandaai.co/api/file-base64-upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ base64Data: $('Code - Base64 ke Buffer').first().json.base64DataUrl, uploadPath: 'telegram-images', fileName: 'foto_' + Date.now() + '.jpg' }) }}",
+        "options": {}
+      },
+      "id": "24a2c114-d559-436d-9797-d0f71b66fd8a",
+      "name": "KIE - Upload Gambar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1856,
+        1824
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FP9UPQrZsHBO6zDY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/veo/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: ( $('Gemini - Analisis Gambar').first().json.content.parts.filter(p => p.text && !p.thought).map(p => p.text).join(' ').trim()), imageUrls: [ $json.data.downloadUrl ], model: 'veo3_fast', aspectRatio: '16:9', generationType: 'FIRST_AND_LAST_FRAMES_2_VIDEO' }) }}",
+        "options": {}
+      },
+      "id": "72b215d0-a3ed-4991-99ee-1129b617022b",
+      "name": "KIE - Buat Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2064,
+        1824
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FP9UPQrZsHBO6zDY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "ff7a2fe4-9c4a-41bf-89a8-efd9062df946",
+      "name": "Tunggu Video",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2288,
+        1824
+      ],
+      "webhookId": "wait-760659"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/veo/record-info",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $('KIE - Buat Video').first().json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cd6182ea-65e5-4e8c-ae61-43541f90352f",
+      "name": "KIE - Cek Status Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2512,
+        1824
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FP9UPQrZsHBO6zDY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-496701",
+              "leftValue": "={{ $json.data.successFlag }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "rightValue": 1
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "06d221b3-b1d1-4b4f-a7a5-22af07c7c0fc",
+      "name": "Video Selesai?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2736,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "6634877058",
+        "file": "={{ (() => { let r = $json.data.response.resultUrls; if (typeof r === 'string') r = JSON.parse(r); return r[0]; })() }}",
+        "additionalFields": {
+          "caption": "🎬 Video selesai dibuat!"
+        }
+      },
+      "id": "69065a1a-9bb7-4a1c-a0f8-88bef99cd7d9",
+      "name": "Kirim Video ke Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2976,
+        1808
+      ],
+      "webhookId": "tg-send-video",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-f2c06f77",
+              "leftValue": "={{ String($json.data.status || '') }}",
+              "rightValue": "FAIL",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c-3c1b7752",
+              "leftValue": "={{ Number($json.data.successFlag) }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "c-26860557",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 15,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "f68a59ff-9588-4834-a145-d641c550e1f3",
+      "name": "Gambar Gagal?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        1536
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6634877058",
+        "text": "=❌ Gambar gagal/timeout. Status: {{ $json.data.status }} | successFlag: {{ $json.data.successFlag }} | pesan: {{ $json.data.errorMessage || '-' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1885e705-8270-421e-8a2b-a88367e3f99a",
+      "name": "Kirim Error Gambar",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2368,
+        1520
+      ],
+      "webhookId": "2e55974a-2a5a-494b-9782-4f5705ce6913",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-b8606b02",
+              "leftValue": "={{ Number($json.data.successFlag) }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "c-abaa89cf",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 20,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "8ead2ccd-cb4f-4c02-8cf2-178045f5da47",
+      "name": "Video Gagal?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3424,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6634877058",
+        "text": "=❌ Video gagal/timeout. successFlag: {{ $json.data.successFlag }} | pesan: {{ $json.data.errorMessage || '-' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6179c048-4150-413d-845d-8cc27b366ac9",
+      "name": "Kirim Error Video",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3664,
+        1856
+      ],
+      "webhookId": "05157377-baa7-4017-9f44-f48a4a547b4d",
+      "credentials": {
+        "telegramApi": {
+          "id": "ePTwBOoDY8vi7FEv",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Siapkan Input Ide",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Info Proses Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "KIE - Buat Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Siapkan Input Ide": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Pisah Rencana Konten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pisah Rencana Konten": {
+      "main": [
+        [
+          {
+            "node": "Format Pesan Ide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Pesan Ide": {
+      "main": [
+        [
+          {
+            "node": "Kirim Ide ke Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE - Buat Gambar": {
+      "main": [
+        [
+          {
+            "node": "Tunggu Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tunggu Gambar": {
+      "main": [
+        [
+          {
+            "node": "KIE - Cek Status Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE - Cek Status Gambar": {
+      "main": [
+        [
+          {
+            "node": "Gambar Selesai?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gambar Selesai?": {
+      "main": [
+        [
+          {
+            "node": "Kirim Gambar ke Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gambar Gagal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info Proses Video": {
+      "main": [
+        [
+          {
+            "node": "Get a File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a File": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code - Base64 ke Buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Base64 ke Buffer": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Analisis Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Analisis Gambar": {
+      "main": [
+        [
+          {
+            "node": "KIE - Upload Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE - Upload Gambar": {
+      "main": [
+        [
+          {
+            "node": "KIE - Buat Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE - Buat Video": {
+      "main": [
+        [
+          {
+            "node": "Tunggu Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tunggu Video": {
+      "main": [
+        [
+          {
+            "node": "KIE - Cek Status Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE - Cek Status Video": {
+      "main": [
+        [
+          {
+            "node": "Video Selesai?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Selesai?": {
+      "main": [
+        [
+          {
+            "node": "Kirim Video ke Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Video Gagal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gambar Gagal?": {
+      "main": [
+        [
+          {
+            "node": "Kirim Error Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tunggu Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Gagal?": {
+      "main": [
+        [
+          {
+            "node": "Kirim Error Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tunggu Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f594fd71-0ae8-4e63-9e9a-764b29c32901",
+  "meta": {
+    "instanceId": "dc96f10ae7dc95d3c138575ba243a0a167923dbcb524841d451aadf9135d5fb3"
+  },
+  "nodeGroups": [],
+  "id": "TKJ9xwkcNVIoAmNA",
+  "tags": []
+}
